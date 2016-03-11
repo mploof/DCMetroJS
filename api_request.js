@@ -2,21 +2,23 @@
 var stationInfo = "https://api.wmata.com/Rail.svc/json/";
 var stationPrediction = "https://api.wmata.com/StationPrediction.svc/json/"
 
-function getLineInfo(){
+function getLineInfo(callback){
   var apiUrl = stationInfo + "jLines?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
       console.log("Got lines info: ");
       console.log(jsonObject.Lines);
   }
-  apiCall(apiUrl, null, callBack);
+  if(callback == null)
+    callback = defaultCallback;
+  apiCall(apiUrl, null, callback);
 }
 
-function getParkingInfo(stationCode){
+function getParkingInfo(stationCode, callback){
   var params = {
     "StationCode": stationCode,
   }
   var apiUrl = stationInfo + "jStationParking?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
     if(stationCode == null){
       console.log("Got all parking info: ");
       console.log(jsonObject.StationsParking);
@@ -26,36 +28,42 @@ function getParkingInfo(stationCode){
       console.log(jsonObject.StationsParking[0]);
     }
   }
+  if(callback == null)
+    callback = defaultCallback;
   if(stationCode == null)
     params = null;
-  apiCall(apiUrl, params, callBack);
+  apiCall(apiUrl, params, callback);
 }
 
-function getPath(stationCode0, stationCode1){
+function getPath(stationCode0, stationCode1, callback){
   var params = {
     "FromStationCode": station0,
     "ToStationCode": station1,
   }
   var apiUrl = stationInfo + "jPath?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
       console.log("Got path info: ");
       console.log(jsonObject.Path);
   }
-  apiCall(apiUrl, params, callBack);
+  if(callback == null)
+    callback = defaultCallback;
+  apiCall(apiUrl, params, callback);
 }
 
-function getStationEntrances(lat, lon, radius){
+function getStationEntrances(lat, lon, radius, callback){
   var params = {
     "Lat": lat,
     "Lon": lon,
     "Radius": radius,
   }
   var apiUrl = stationInfo + "jStationEntrances?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
     console.log("Got nearby entrance info: ");
     console.log(jsonObject.Entrances);
   }
-  apiCall(apiUrl, params, callBack);
+  if(callback == null)
+    callback = defaultCallback;
+  apiCall(apiUrl, params, callback);
 }
 
 function getStationInfo(stationCode){
@@ -63,45 +71,50 @@ function getStationInfo(stationCode){
     "StationCode": stationCode,
   }
   var apiUrl = stationInfo + "jStationInfo?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
       console.log("Got station info: ");
       console.log(jsonObject);
   }
-  apiCall(apiUrl, params, callBack);
+  if(callback == null)
+    callback = defaultCallback;
+  apiCall(apiUrl, params, callback);
 }
 
-function getStationList(){
-  getStationList(null);
+function getStationList(callback){
+  getStationList(null, callback);
 }
-function getStationList(lineCode){
+function getStationList(lineCode, callback){
+  console.log("Getting station list!");
   var params = {
     "LineCode": lineCode,
   }
-  var apiUrl = stationInfo + "jStationInfo?";
-  function callBack(jsonObject){
+  var apiUrl = stationInfo + "jStations?";
+  function defaultCallback(jsonObject, params){
     if(lineCode == null){
       console.log("Got all station infos: ");
       console.log(jsonObject.Stations);
     }
     else{
-      console.log("Got all station info: ");
-      console.log(jsonObject.Stations[0]);
+      console.log("Got station info for line " + lineCode + ": ");
+      console.log(jsonObject.Stations);
     }
   }
+  if(callback == null)
+    callback = defaultCallback;
   if(lineCode == null)
     params = null;
-  apiCall(apiUrl, params, callBack);
+  apiCall(apiUrl, params, callback);
 }
 
-function getStationTiming(){
-  getStationTiming(null);
+function getStationTiming(callback){
+  getStationTiming(null, callback);
 }
-function getStationTiming(stationCode){
+function getStationTiming(stationCode, callback){
   var params = {
     "StationCode": stationCode,
   }
   var apiUrl = stationInfo + "jStationTimes?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
     if(lineCode == null){
       console.log("Got all station timing info: ");
       console.log(jsonObject.StationTimes);
@@ -111,27 +124,31 @@ function getStationTiming(stationCode){
       console.log(jsonObject.StationTimes[0]);
     }
   }
+  if(callback == null)
+    callback = defaultCallback;
   if(lineCode == null)
     params = null;
-  apiCall(apiUrl, params, callBack);
+  apiCall(apiUrl, params, callback);
 }
 
-function getStationToStation(stationCode0, stationCode1){
+function getStationToStation(stationCode0, stationCode1, callback){
   var params = {
     "FromStationCode": stationCode0,
     "ToStationCode": stationCode1,
   }
   var apiUrl = stationInfo + "jSrcStationToDstStationInfo?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
     console.log("Got an object: ");
     console.log(jsonObject.StationToStationInfos[0]);
   }
-  apiCall(apiUrl, params, callBack);
+  if(callback == null)
+    callback = defaultCallback;
+  apiCall(apiUrl, params, callback);
 }
 
-function getNextTrains(stationCode){
+function getNextTrains(stationCode, callback){
   var apiUrl = stationPrediction + "GetPrediction/" + stationCode + "?";
-  function callBack(jsonObject){
+  function defaultCallback(jsonObject, params){
     console.log("Got next trains info: ");
     var dest = String(jsonObject.Trains[0].Destination);
     console.log(jsonObject.Trains[0]);
@@ -139,10 +156,12 @@ function getNextTrains(stationCode){
     results.appendChild(document.createTextNode(dest));
     document.getElementById('results').appendChild(results);
   }
-  apiCall(apiUrl, null, callBack);
+  if(callback == null)
+    callback = defaultCallback;
+  apiCall(apiUrl, null, callback);
 }
 
-function apiCall(apiUrl, params, callBack){
+function apiCall(apiUrl, params, callback){
   $(function() {
     console.log("Starting the API call")
       var api = {
@@ -154,11 +173,7 @@ function apiCall(apiUrl, params, callBack){
         apiUrl = apiUrl + "&" + $.param(params);
       console.log("request url: " + apiUrl);
       $.getJSON(apiUrl, function(json){
-        callBack(json);
+        callback(json, params);
       });
   });
 }
-
-// Actually do some stuff
-//getStationToStation("E10", "J03");
-getNextTrains("E10");
